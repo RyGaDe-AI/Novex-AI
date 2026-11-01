@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Novex AI</title>
+
+<style>
+*{
+ box-sizing:border-box;
+ -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+ margin:0;
+ width:100%;
+ height:100%;
+ background:#08090d;
+ color:#fff;
+ font-family:Arial,sans-serif;
+}
+
+body{
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
+}
+
+/* HEADER */
+header{
+ height:60px;
+ flex-shrink:0;
+ display:flex;
+ align-items:center;
+ padding:0 14px;
+ background:#101117;
+ border-bottom:1px solid #292c35;
+}
+
+.logo{
+ width:40px;
+ height:40px;
+ border-radius:13px;
+ background:linear-gradient(135deg,#3478ff,#713bff);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:22px;
+}
+
+.title{
+ margin-right:10px;
+ font-size:20px;
+ font-weight:bold;
+}
+
+.online{
+ margin-right:auto;
+ color:#55d889;
+ font-size:11px;
+}
+
+/* CHAT */
+#chat{
+ flex:1;
+ overflow-y:auto;
+ padding:14px;
+ padding-bottom:145px;
+}
+
+.welcome{
+ text-align:center;
+ margin:35px 10px;
+}
+
+.biglogo{
+ width:75px;
+ height:75px;
+ margin:auto;
+ border-radius:24px;
+ background:linear-gradient(135deg,#3270ff,#713bff);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:38px;
+ box-shadow:0 10px 40px rgba(60,80,255,.3);
+}
+
+.welcome h2{
+ margin:15px 0 5px;
+}
+
+.welcome p{
+ color:#858a99;
+ font-size:14px;
+}
+
+.msg{
+ max-width:89%;
+ padding:12px 14px;
+ margin:9px 0;
+ border-radius:16px;
+ line-height:1.6;
+ white-space:pre-wrap;
+ word-wrap:break-word;
+}
+
+.user{
+ background:#3268ff;
+ margin-left:auto;
+ border-bottom-right-radius:5px;
+}
+
+.ai{
+ background:#20222a;
+ margin-right:auto;
+ border-bottom-left-radius:5px;
+}
+
+/* BOTTOM */
+#bottom{
+ position:fixed;
+ bottom:0;
+ left:0;
+ right:0;
+ background:#101117;
+ border-top:1px solid #292c35;
+ padding:7px;
+}
+
+/* SELECTOR */
+#selector{
+ position:relative;
+}
+
+#currentModel{
+ width:100%;
+ height:39px;
+ border:1px solid #30333d;
+ border-radius:11px;
+ background:#181a20;
+ color:#fff;
+ text-align:right;
+ padding:0 12px;
+ font-size:13px;
+ margin-bottom:7px;
+}
+
+#currentModel:active{
+ background:#22252e;
+}
+
+/* MENU */
+#modelMenu{
+ display:none;
+ position:absolute;
+ bottom:46px;
+ right:0;
+ left:0;
+ background:#17191f;
+ border:1px solid #30333d;
+ border-radius:14px;
+ padding:6px;
+ box-shadow:0 8px 30px rgba(0,0,0,.5);
+}
+
+.modelOption{
+ width:100%;
+ border:0;
+ background:transparent;
+ color:#fff;
+ text-align:right;
+ padding:11px;
+ border-radius:10px;
+ font-size:14px;
+}
+
+.modelOption:active{
+ background:#292d38;
+}
+
+.modelOption small{
+ display:block;
+ color:#858a99;
+ margin-top:3px;
+}
+
+/* INPUT */
+#inputRow{
+ display:flex;
+ gap:7px;
+}
+
+#question{
+ flex:1;
+ min-width:0;
+ height:46px;
+ border:1px solid #30333d;
+ outline:0;
+ border-radius:13px;
+ background:#1b1d24;
+ color:#fff;
+ padding:0 13px;
+ font-size:16px;
+}
+
+#send{
+ width:72px;
+ height:46px;
+ border:0;
+ border-radius:13px;
+ background:#3268ff;
+ color:#fff;
+ font-weight:bold;
+}
+
+#send:disabled{
+ opacity:.5;
+}
+
+/* MODELS PAGE */
+#models{
+ position:absolute;
+ top:60px;
+ bottom:0;
+ left:0;
+ right:0;
+ background:#08090d;
+ overflow:auto;
+ padding:14px;
+ display:none;
+}
+
+.card{
+ background:#15171e;
+ border:1px solid #292c35;
+ border-radius:16px;
+ padding:13px;
+ margin-bottom:10px;
+}
+
+.cardTitle{
+ font-size:17px;
+ font-weight:bold;
+}
+
+.cardDesc{
+ color:#888e9e;
+ font-size:12px;
+ margin-top:5px;
+}
+
+.card button{
+ width:100%;
+ height:40px;
+ margin-top:10px;
+ border:0;
+ border-radius:10px;
+ background:#3268ff;
+ color:white;
+}
+
+.nav{
+ position:fixed;
+ top:14px;
+ left:14px;
+ border:0;
+ background:#1b1d24;
+ color:white;
+ border-radius:9px;
+ padding:7px 10px;
+ display:none;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+ <div class="logo">✦</div>
+
+ <div class="title">Novex</div>
+
+ <div class="online">● متصل</div>
+
+</header>
+
+<div id="chat">
+
+ <div class="welcome">
+
+  <div class="biglogo">🤖</div>
+
+  <h2>مرحباً بك في Novex</h2>
+
+  <p>اختر النظام الذي تريد أن يجيبك</p>
+
+ </div>
+
+</div>
+
+<!-- MODELS PAGE -->
+<div id="models">
+
+ <button class="nav" onclick="closeModels()">رجوع</button>
+
+ <h2>🧠 أنظمة Novex</h2>
+
+ <div class="card">
+  <div class="cardTitle">⚡ Novex Fast</div>
+  <div class="cardDesc">سريع للأسئلة اليومية</div>
+  <button onclick="install('fast')">
+   تنزيل
+  </button>
+ </div>
+
+ <div class="card">
+  <div class="cardTitle">🧠 Novex Smart</div>
+  <div class="cardDesc">تحليل وتفكير أفضل</div>
+  <button onclick="install('smart')">
+   تنزيل
+  </button>
+ </div>
+
+ <div class="card">
+  <div class="cardTitle">💻 Novex Code</div>
+  <div class="cardDesc">متخصص في البرمجة</div>
+  <button onclick="install('code')">
+   تنزيل
+  </button>
+ </div>
+
+ <div class="card">
+  <div class="cardTitle">✍️ Novex Writer</div>
+  <div class="cardDesc">الكتابة وإعادة الصياغة</div>
+  <button onclick="install('writer')">
+   تنزيل
+  </button>
+ </div>
+
+</div>
+
+<!-- BOTTOM -->
+<div id="bottom">
+
+ <div id="selector">
+
+  <button id="currentModel">
+   🧠 Novex Fast ▾
+  </button>
+
+  <div id="modelMenu">
+
+   <button class="modelOption"
+   onclick="selectModel('fast')">
+   ⚡ Novex Fast
+   <small>سريع</small>
+   </button>
+
+   <button class="modelOption"
+   onclick="selectModel('smart')">
+   🧠 Novex Smart
+   <small>تحليل وتفكير</small>
+   </button>
+
+   <button class="modelOption"
+   onclick="selectModel('code')">
+   💻 Novex Code
+   <small>برمجة</small>
+   </button>
+
+   <button class="modelOption"
+   onclick="selectModel('writer')">
+   ✍️ Novex Writer
+   <small>كتابة</small>
+   </button>
+
+  </div>
+
+ </div>
+
+ <div id="inputRow">
+
+  <input
+   id="question"
+   placeholder="اكتب سؤالك..."
+   autocomplete="off">
+
+  <button id="send">
+   إرسال
+  </button>
+
+ </div>
+
+</div>
+
+<script>
+
+/* الأنظمة */
+
+var systems={
+
+ fast:
+ "أنت Novex Fast. أجب بسرعة وبوضوح وباختصار.",
+
+ smart:
+ "أنت Novex Smart. حلل السؤال جيداً وأعط إجابة دقيقة ومنظمة.",
+
+ code:
+ "أنت Novex Code. أنت متخصص في البرمجة. أعط كوداً كاملاً عند طلب البرمجة.",
+
+ writer:
+ "أنت Novex Writer. ساعد المستخدم في الكتابة وإعادة الصياغة بأسلوب واضح."
+};
+
+var names={
+
+ fast:"⚡ Novex Fast",
+
+ smart:"🧠 Novex Smart",
+
+ code:"💻 Novex Code",
+
+ writer:"✍️ Novex Writer"
+
+};
+
+var current=
+ localStorage.getItem("novex_current") || "fast";
+
+var currentButton=
+ document.getElementById("currentModel");
+
+var menu=
+ document.getElementById("modelMenu");
+
+function updateModel(){
+
+ currentButton.textContent=
+ names[current]+" ▾";
+
+ localStorage.setItem(
+  "novex_current",
+  current
+ );
+}
+
+updateModel();
+
+/* فتح القائمة */
+
+currentButton.onclick=function(){
+
+ if(menu.style.display=="block")
+  menu.style.display="none";
+ else
+  menu.style.display="block";
+
+};
+
+/* اختيار النظام */
+
+function selectModel(type){
+
+ current=type;
+
+ updateModel();
+
+ menu.style.display="none";
+
+}
+
+/* تنزيل النظام */
+
+function install(type){
+
+ var key="novex_installed_"+type;
+
+ localStorage.setItem(key,"1");
+
+ current=type;
+
+ updateModel();
+
+ alert(names[type]+" جاهز للاستخدام.");
+
+}
+
+/* إرسال */
+
+var question=
+ document.getElementById("question");
+
+var send=
+ document.getElementById("send");
+
+var chat=
+ document.getElementById("chat");
+
+function add(text,type){
+
+ var d=document.createElement("div");
+
+ d.className="msg "+type;
+
+ d.textContent=text;
+
+ chat.appendChild(d);
+
+ chat.scrollTop=
+ chat.scrollHeight;
+
+ return d;
+}
+
+function ask(){
+
+ var q=question.value.trim();
+
+ if(!q)return;
+
+ add(q,"user");
+
+ question.value="";
+
+ var loading=
+ add("جاري التفكير...","ai");
+
+ send.disabled=true;
+
+ var prompt=
+ systems[current]+
+ "\n\nسؤال المستخدم:\n"+
+ q;
+
+ var url=
+ "https://text.pollinations.ai/"+
+ encodeURIComponent(prompt);
+
+ fetch(url)
+
+ .then(function(r){
+
+  if(!r.ok)
+   throw new Error();
+
+  return r.text();
+ })
+
+ .then(function(answer){
+
+  loading.textContent=
+   answer || "لم يصل رد.";
+alert(answer)
+ })
+
+ .catch(function(){
+
+  loading.textContent=
+   "❌ تعذر الاتصال بالذكاء الاصطناعي.\n"+
+   "تأكد من الإنترنت.";
+
+ })
+
+ .then(function(){
+
+  send.disabled=false;
+
+ });
+
+}
+
+send.onclick=ask;
+
+question.onkeydown=function(e){
+
+ if(e.keyCode==13)
+  ask();
+
+};
+
+</script>
+
+</body>
+</html>
